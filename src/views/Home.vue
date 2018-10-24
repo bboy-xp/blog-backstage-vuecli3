@@ -18,37 +18,6 @@
           </el-menu>
         </el-aside>
         <el-main>
-          <!-- <el-table
-            :data="tableData"
-            stripe
-            style="width: 100%">
-            <el-table-column
-              prop="createdAt"
-              label="日期"
-              >
-            </el-table-column>
-            <el-table-column
-              prop="author"
-              label="作者"
-              >
-            </el-table-column>
-            <el-table-column
-              prop="title"
-              label="标题">
-            </el-table-column>
-            <el-table-column
-              prop="content"
-              label="内容">
-            </el-table-column>
-            <el-table-column label="操作">
-              <template slot-scope="scope">
-                <el-button
-                  size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table> -->
 
           <el-table
             :data="tableData"
@@ -97,9 +66,35 @@
                   size="mini"
                   type="danger"
                   @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                <el-button
+                  size="mini"
+                  type="primary"
+                  @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               </template>
             </el-table-column>
           </el-table>
+
+          <!-- editModel -->
+          <el-dialog title="编辑博客" :visible.sync="dialogEditVisible">
+            <el-row>
+              <el-col>
+                <span>作者</span>
+                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.author"></el-input>
+              </el-col>
+              <el-col class="editBox">
+                <span>标题</span>
+                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.title"></el-input>
+              </el-col>
+              <el-col class="editBox">
+                <span>内容</span>
+                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.content"></el-input>
+              </el-col>
+              <el-col class="editBox">
+                <span>ObjectId</span>
+                <span class="el-input">{{this.placeholderData._id}}</span>
+              </el-col>
+            </el-row>
+          </el-dialog>
         </el-main>
       </el-container>
     </el-container>
@@ -112,7 +107,15 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tableData: []
+      tableData: [],
+      dialogEditVisible: false,
+      input: "",
+      placeholderData: {
+        _id: "5ba9fc587bad274a84977ead",
+        title: "sefesfse",
+        author: "fsefsef",
+        content : "12312312312"
+      }
     };
   },
   methods: {
@@ -122,9 +125,17 @@ export default {
     async handleDelete(index, row) {
       // console.log(row._id);
       const id = row._id;
-      const deleteBlog = await axios.post("http://127.0.0.1:7001/deleteArticle", {id: id});
+      const deleteBlog = await axios.post(
+        "http://127.0.0.1:7001/deleteArticle",
+        { id: id }
+      );
       // console.log(deleteBlog);
       this.tableData = deleteBlog.data;
+    },
+    async handleEdit(index, row) {
+      // console.log(row);
+      this.placeholderData = row;
+      this.dialogEditVisible = !this.dialogEditVisible;
     }
   },
   async mounted() {
@@ -151,6 +162,13 @@ export default {
 .contentText {
   width: 80%;
   word-wrap: break-word;
+}
+.el-input {
+  width: 300px;
+  margin-left: 40px;
+}
+.editBox {
+  margin-top: 20px;
 }
 </style>
 

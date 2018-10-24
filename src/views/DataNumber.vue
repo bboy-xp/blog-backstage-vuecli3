@@ -20,7 +20,7 @@
         <el-main>
           <el-row>
             <el-col :span="10">
-              <div class="grid-content bg-purple-dark">
+              <div id="myChart" class="grid-content bg-purple-dark">
                 总数：100
               </div>
             </el-col>
@@ -36,11 +36,54 @@
 
 export default {
   data() {
-    return {};
+    return {
+      myChart: null,
+      option: []
+    };
+  },
+  mounted() {
+    this.drawLine();
   },
   methods: {
     gotoHome() {
       this.$router.push({ path: "/" });
+    },
+    drawLine() {
+      // 基于准备好的dom，初始化echarts实例
+      let myChart = this.$echarts.init(document.getElementById("myChart"));
+
+      this.option = {
+        title: {
+          text: "一周访问量"
+        },
+        tooltip: {
+          trigger: "axis"
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true
+        },
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+        },
+        yAxis: {
+          type: "value"
+        },
+        series: [
+          {
+            name: "访问人数",
+            type: "line",
+            stack: "总量",
+            data: [80, 122, 101, 204, 90, 170, 130]
+          }
+        ]
+      };
+      // 绘制图表
+      myChart.setOption(this.option);
     }
   }
 };
@@ -60,7 +103,7 @@ export default {
 }
 .grid-content {
   border-radius: 4px;
-  height: 40px;
+  height: 500px;
 }
 .bg-purple-dark {
   /* background: #99a9bf; */
