@@ -12,7 +12,7 @@
               <span slot="title">数据管理</span>
             </el-menu-item>
             <el-menu-item index="2">
-              <i class="el-icon-edit"></i>
+              <i class="el-icon-tickets"></i>
               <span slot="title">数据总览</span>
             </el-menu-item>
           </el-menu>

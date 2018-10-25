@@ -12,7 +12,7 @@
               <span slot="title">数据管理</span>
             </el-menu-item>
             <el-menu-item index="2" @click="gotoDataNumber">
-              <i class="el-icon-edit"></i>
+              <i class="el-icon-tickets"></i>
               <span slot="title">数据总览</span>
             </el-menu-item>
           </el-menu>
@@ -50,7 +50,7 @@
             </el-table-column>
             <el-table-column
               label="日期"
-              prop="date">
+              prop="createdAt">
             </el-table-column>
             <el-table-column
               label="作者"
@@ -75,23 +75,27 @@
           </el-table>
 
           <!-- editModel -->
-          <el-dialog title="编辑博客" :visible.sync="dialogEditVisible">
+          <el-dialog @close="handleCloseDialog" title="编辑博客" :visible.sync="dialogEditVisible">
             <el-row>
               <el-col>
                 <span>作者</span>
-                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.author"></el-input>
+                <el-input maxlength="30" v-model="author" :placeholder="this.placeholderData.author"></el-input>
               </el-col>
               <el-col class="editBox">
                 <span>标题</span>
-                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.title"></el-input>
+                <el-input maxlength="30" v-model="title" :placeholder="this.placeholderData.title"></el-input>
               </el-col>
               <el-col class="editBox">
                 <span>内容</span>
-                <el-input maxlength="30" v-model="input" :placeholder="this.placeholderData.content"></el-input>
+
+                <el-input class="contentBox" type="textarea" rows="10" resize="none" v-model="content" :placeholder="this.placeholderData.content"></el-input>
               </el-col>
               <el-col class="editBox">
                 <span>ObjectId</span>
                 <span class="el-input">{{this.placeholderData._id}}</span>
+              </el-col>
+              <el-col class="editBox">
+                <el-button @click="saveData" type="primary">保存</el-button>
               </el-col>
             </el-row>
           </el-dialog>
@@ -109,13 +113,11 @@ export default {
     return {
       tableData: [],
       dialogEditVisible: false,
-      input: "",
-      placeholderData: {
-        _id: "5ba9fc587bad274a84977ead",
-        title: "sefesfse",
-        author: "fsefsef",
-        content : "12312312312"
-      }
+      author: "",
+      title: "",
+      content: "",
+      _id: "",
+      placeholderData: {}
     };
   },
   methods: {
@@ -125,17 +127,65 @@ export default {
     async handleDelete(index, row) {
       // console.log(row._id);
       const id = row._id;
-      const deleteBlog = await axios.post(
-        "http://127.0.0.1:7001/deleteArticle",
-        { id: id }
-      );
-      // console.log(deleteBlog);
-      this.tableData = deleteBlog.data;
+      const that = this;
+      this.$confirm("此操作将永久删除该条博客, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+      .then(() => {
+        axios.post(
+          "http://127.0.0.1:7001/deleteArticle",
+          { id: id }
+        ).then(res => {
+          console.log(res);
+          that.tableData = res.data;
+        });
+        // this.tableData = deleteBlog.data;
+        this.$message({
+          type: "success",
+          message: "删除成功!"
+        });
+      })
+      .catch(() => {
+        this.$message({
+          type: "info",
+          message: "已取消删除"
+        });
+      });
+
+      
     },
     async handleEdit(index, row) {
       // console.log(row);
       this.placeholderData = row;
+      this._id = row._id;
       this.dialogEditVisible = !this.dialogEditVisible;
+    },
+    async saveData() {
+      const postData = {
+        _id: this._id,
+        author: this.author,
+        title: this.title,
+        content: this.content
+      };
+      // console.log(postData);
+      const updateData = await axios.post("http://127.0.0.1:7001/updateArticle",postData);
+      this.tableData = updateData.data;
+      //消息提示
+      this.$message({
+        message: '恭喜你，修改成功',
+        type: 'success'
+      });
+      //关闭Dialog
+      this.dialogEditVisible = !this.dialogEditVisible;
+    },
+    handleCloseDialog() {
+      this.author = "";
+      this.title = "";
+      this.content = "";
+      this._id = "";
+      this.placeholderData = {};
     }
   },
   async mounted() {
@@ -162,6 +212,9 @@ export default {
 .contentText {
   width: 80%;
   word-wrap: break-word;
+}
+.contentBox {
+  margin-top: 20px;
 }
 .el-input {
   width: 300px;
